@@ -6,7 +6,7 @@ import Modal from "../Modal/Modal";
 
 const AllGoals = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [goals, _] = useState([
+  const [goals, setGoals] = useState([
     {
       id: 1,
       title: "Запустити власний стартап",
@@ -96,6 +96,10 @@ const AllGoals = () => {
     },
   ]);
 
+  const onSubmit = (newGoal) => {
+    setGoals((prevGoals) => [...prevGoals, newGoal]);
+  };
+
   return (
     <section>
       <Container>
@@ -107,7 +111,7 @@ const AllGoals = () => {
           Додати ціль
         </button>
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <GoalForm />
+          <GoalForm onSubmit={onSubmit} />
         </Modal>
         <ListOfGoals allGoals={goals} isModalOpen={setIsModalOpen} />
       </Container>

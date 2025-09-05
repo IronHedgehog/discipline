@@ -1,33 +1,50 @@
 import { ErrorMessage, Field, Form, Formik } from "formik";
+import { nanoid } from "nanoid";
+import { useState } from "react";
 import * as Yup from "yup";
 
 const GoalForm = ({ onSubmit }) => {
+  const [subItems, setSubItems] = useState([]);
+  const [subTaskInput, setSubTaskInput] = useState("");
   const initialValues = {
     title: "",
-    parentItem: "",
-    subItem: "",
-    start: "",
-    finish: "",
-    startDate: "",
-    endDate: "",
-    progress: 0,
+    startDate: new Date().toISOString().split("T")[0],
+    description: "",
     project: "",
     priority: "Low",
-    teammates: "",
     status: "Not started",
     deadline: "",
-    duration: "",
   };
 
   const validationSchema = Yup.object({
     title: Yup.string().required("Обов’язкове поле"),
-    progress: Yup.number().min(0).max(100),
     priority: Yup.string().oneOf(["Low", "Medium", "High"]),
     status: Yup.string().oneOf(["Not started", "In progress", "Completed"]),
+    startDate: Yup.date().required("Дата початку обов’язкова"),
+    deadline: Yup.date()
+      .required("Термін виконання обов’язковий")
+      .min(Yup.ref("startDate"), "Deadline не може бути раніше дати початку"),
   });
 
+  const handleAddSubTask = () => {
+    if (subTaskInput.trim()) {
+      setSubItems((prev) => [...prev, subTaskInput.trim()]);
+      setSubTaskInput("");
+    }
+  };
+
+  const handleRemoveSubTask = (index) => {
+    setSubItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (values, { resetForm }) => {
-    onSubmit(values);
+    const newGoal = {
+      id: nanoid(),
+      subItems,
+      ...values,
+    };
+    onSubmit(newGoal);
+    setSubItems([]);
     resetForm();
   };
 
@@ -45,23 +62,43 @@ const GoalForm = ({ onSubmit }) => {
         </label>
 
         <label>
-          Parent item
-          <Field name="parentItem" />
+          Підзадачі
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <input
+              type="text"
+              value={subTaskInput}
+              onChange={(e) => setSubTaskInput(e.target.value)}
+              placeholder="Введіть підзадачу"
+            />
+            <button type="button" onClick={handleAddSubTask}>
+              ➕
+            </button>
+          </div>
+          {subItems.length > 0 && (
+            <ul>
+              {subItems.map((task, index) => (
+                <li key={index}>
+                  {task}{" "}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSubTask(index)}
+                  >
+                    ❌
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </label>
 
         <label>
-          Sub-item
-          <Field name="subItem" />
+          Опис задачі
+          <Field name="description" />
         </label>
 
         <label>
-          Почати
-          <Field name="start" type="text" />
-        </label>
-
-        <label>
-          Завершити
-          <Field name="finish" type="text" />
+          Проєкт
+          <Field name="project" />
         </label>
 
         <label>
@@ -70,18 +107,8 @@ const GoalForm = ({ onSubmit }) => {
         </label>
 
         <label>
-          Окончание
-          <Field name="endDate" type="date" />
-        </label>
-
-        <label>
-          Прогрес (%)
-          <Field name="progress" type="number" />
-        </label>
-
-        <label>
-          Проєкт
-          <Field name="project" />
+          Дедлайн
+          <Field name="deadline" type="date" />
         </label>
 
         <label>
@@ -94,27 +121,12 @@ const GoalForm = ({ onSubmit }) => {
         </label>
 
         <label>
-          Разом з
-          <Field name="teammates" />
-        </label>
-
-        <label>
           Статус
           <Field as="select" name="status">
             <option value="Not started">Not started</option>
             <option value="In progress">In progress</option>
             <option value="Completed">Completed</option>
           </Field>
-        </label>
-
-        <label>
-          Термін виконання
-          <Field name="deadline" type="date" />
-        </label>
-
-        <label>
-          Час виконання
-          <Field name="duration" type="text" />
         </label>
 
         <button type="submit">Зберегти задачу</button>
