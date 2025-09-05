@@ -103,12 +103,12 @@ const AllGoals = () => {
   return (
     <section>
       <Container>
-        <h2>Мої цілі</h2>
+        <h2>Мої задачі</h2>
         <button onClick={() => setIsModalOpen(true)}>
           <svg>
             <use href=""></use>
           </svg>
-          Додати ціль
+          Додати задачу
         </button>
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <GoalForm onSubmit={onSubmit} />

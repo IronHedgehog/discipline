@@ -104,11 +104,13 @@ const GoalForm = ({ onSubmit }) => {
         <label>
           Початок
           <Field name="startDate" type="date" />
+          <ErrorMessage name="title" component="div" />
         </label>
 
         <label>
           Дедлайн
           <Field name="deadline" type="date" />
+          <ErrorMessage name="title" component="div" />
         </label>
 
         <label>
