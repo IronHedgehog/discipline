@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import GoalTimer from "../../GoalTimer/GoalTimer";
+import Modal from "../../Modal/Modal";
 
 const ItemOfGoals = ({
   id,
@@ -8,49 +10,16 @@ const ItemOfGoals = ({
   priority,
   status: initialStatus,
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [status, setStatus] = useState(initialStatus || "Not Started");
-  const [timeSpent, setTimeSpent] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-
-  // Лічильник часу
-  useEffect(() => {
-    let timer;
-    if (isRunning) {
-      timer = setInterval(() => {
-        setTimeSpent((prev) => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [isRunning]);
-
-  // Форматування часу
-  const formatTime = (seconds) => {
-    const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
-    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
-    const s = String(seconds % 60).padStart(2, "0");
-    return `${h}:${m}:${s}`;
-  };
-
-  // Обробники кнопок
-  const handleStart = () => {
-    setIsRunning(true);
-    setStatus("In Progress");
-  };
-
-  const handlePause = () => {
-    setIsRunning(false);
-    setStatus("Paused");
-  };
-
-  const handleComplete = () => {
-    setIsRunning(false);
-    setStatus("Completed");
-  };
 
   return (
     <li
       id={id}
       style={{ border: "1px solid #ccc", padding: "1rem", margin: "1rem 0" }}
+      onClick={(e) => {
+        setIsModalOpen(true), e.stopPropagation();
+      }}
     >
       <h2>{title}</h2>
       <p>Пріоритет: {priority}</p>
@@ -61,17 +30,34 @@ const ItemOfGoals = ({
       ) : (
         <p>Підзадач немає</p>
       )}
-      <p>
-        Витрачено часу: <span>{formatTime(timeSpent)}</span>
-      </p>
 
-      {status !== "Completed" && (
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <button onClick={handleStart}>Розпочати задачу</button>
-          <button onClick={handlePause}>Призупинити виконання задачі</button>
-          <button onClick={handleComplete}>Завершити задачу</button>
-        </div>
-      )}
+      <GoalTimer onStatusChange={setStatus} />
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <h2>{title}</h2>
+        <p>
+          <strong>Пріоритет:</strong> {priority}
+        </p>
+        <p>
+          <strong>Статус:</strong> {status}
+        </p>
+        <p>
+          <strong>Опис:</strong> {description}
+        </p>
+
+        <h3>Підзадачі:</h3>
+        {subItems?.length > 0 ? (
+          <ul>
+            {subItems.map((sub, idx) => (
+              <li key={idx}>{sub}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>Підзадач немає</p>
+        )}
+
+        <GoalTimer onStatusChange={setStatus} time />
+      </Modal>
     </li>
   );
 };
